@@ -353,7 +353,7 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
       {isActiveRole && !hasActed && isMyTurn && currentPlayer.is_alive && (
         <div className="fixed bottom-0 left-0 w-full p-gutter-mobile pb-safe bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/90 to-transparent z-40">
           <button 
-            onClick={handleAction}
+            onClick={() => handleAction()}
             disabled={!selectedTarget || loading}
             className="w-full h-14 rounded-full bg-primary hover:bg-primary-fixed-dim text-on-primary font-headline-md text-headline-md tracking-wider flex items-center justify-center gap-space-sm shadow-[0_4px_20px_rgba(208,188,255,0.4)] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:shadow-none"
           >
