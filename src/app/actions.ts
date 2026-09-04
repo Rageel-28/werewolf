@@ -38,7 +38,11 @@ export async function joinRoomAction(nickname: string, roomCode: string, session
 }
 
 export async function startGameAction(roomId: string, roles: string[]) {
-  const shuffledRoles = [...roles].sort(() => Math.random() - 0.5);
+  const shuffledRoles = [...roles];
+  for (let i = shuffledRoles.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledRoles[i], shuffledRoles[j]] = [shuffledRoles[j], shuffledRoles[i]];
+  }
   const { data: players } = await supabase.from('players').select('*').eq('room_id', roomId);
   if (!players) return { error: 'Gagal mengambil data pemain' };
 

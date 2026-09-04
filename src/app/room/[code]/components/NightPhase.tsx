@@ -107,6 +107,15 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
     }
 
     await submitNightAction(room.id, room.day_count, currentPlayer.id, selectedTarget, role.toLowerCase());
+    
+    // Optimistic UI Update
+    setSubmittedActorIds(prev => {
+       if (!prev.includes(currentPlayer.id)) {
+          return [...prev, currentPlayer.id];
+       }
+       return prev;
+    });
+    
     setLoading(false);
   };
 

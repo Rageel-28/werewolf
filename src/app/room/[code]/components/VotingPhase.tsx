@@ -58,7 +58,15 @@ export default function VotingPhase({ room, players, currentPlayer, isAdmin }: a
     setLoading(true);
     
     const res = await submitVoteAction(room.id, room.day_count, currentPlayer.id, selectedTarget);
-    if (res?.success) setHasVoted(true);
+    
+    if (res?.success) {
+      // Optimistic UI Update
+      setHasVoted(true);
+      setVoteCounts(prev => ({
+         ...prev,
+         [selectedTarget]: (prev[selectedTarget] || 0) + 1
+      }));
+    }
     
     setLoading(false);
   };
