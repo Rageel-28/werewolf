@@ -41,9 +41,15 @@ export default function VotingPhase({ room, players, currentPlayer, isAdmin }: a
         }));
       })
       .subscribe();
+      
+    // FALLBACK POLLING
+    const pollInterval = setInterval(() => {
+       fetchVotes();
+    }, 3000);
 
-    return () => {
-      supabase.removeChannel(votesSub);
+    return () => { 
+       supabase.removeChannel(votesSub); 
+       clearInterval(pollInterval);
     };
   }, [room.id, room.day_count, currentPlayer?.id]);
 

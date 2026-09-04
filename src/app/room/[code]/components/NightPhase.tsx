@@ -72,7 +72,15 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
       })
       .subscribe();
       
-    return () => { supabase.removeChannel(sub); };
+    // FALLBACK POLLING
+    const pollInterval = setInterval(() => {
+       fetchActions();
+    }, 3000);
+      
+    return () => { 
+       supabase.removeChannel(sub); 
+       clearInterval(pollInterval);
+    };
   }, [room.id, room.day_count]);
 
   useEffect(() => {

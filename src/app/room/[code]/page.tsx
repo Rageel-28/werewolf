@@ -107,8 +107,22 @@ export default function RoomPage({ params }: { params: Promise<{ code: string }>
       })
       .subscribe();
 
+    // FALLBACK POLLING: If realtime fails or is blocked by network, poll every 3 seconds
+    const pollInterval = setInterval(async () => {
+       const { data: currentRoom } = await supabase.from('rooms').select('*').eq('id', room.id).single();
+       if (currentRoom) setRoom(currentRoom);
+
+       const { data: currentPlayers } = await supabase.from('players').select('*').eq('room_id', room.id);
+       if (currentPlayers) {
+          setPlayers(currentPlayers);
+          const me = currentPlayers.find(p => p.session_token === sessionToken);
+          setCurrentPlayer(me);
+       }
+    }, 3000);
+
     return () => {
       supabase.removeChannel(playersSub);
+      clearInterval(pollInterval);
     }
   }, [room?.id, sessionToken]);
 

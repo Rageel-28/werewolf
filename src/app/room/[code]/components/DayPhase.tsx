@@ -42,9 +42,15 @@ export default function DayPhase({ room, players, currentPlayer, isAdmin }: any)
         }
       })
       .subscribe();
+      
+    // FALLBACK POLLING
+    const pollInterval = setInterval(() => {
+       fetchChats();
+    }, 3000);
 
-    return () => {
-      supabase.removeChannel(chatSub);
+    return () => { 
+       supabase.removeChannel(chatSub); 
+       clearInterval(pollInterval);
     };
   }, [room.id, room.day_count]);
 
