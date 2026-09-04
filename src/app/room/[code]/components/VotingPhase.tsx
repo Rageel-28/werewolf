@@ -33,7 +33,7 @@ export default function VotingPhase({ room, players, currentPlayer, isAdmin }: a
     if (currentPlayer?.id) fetchVotes();
 
     const votesSub = supabase
-      .channel('votes_updates')
+      .channel(`votes_updates_${room.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'votes', filter: `room_id=eq.${room.id}` }, (payload) => {
         setVoteCounts(prev => ({
           ...prev,

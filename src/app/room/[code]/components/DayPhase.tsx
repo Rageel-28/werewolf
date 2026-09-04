@@ -32,7 +32,7 @@ export default function DayPhase({ room, players, currentPlayer, isAdmin }: any)
     fetchChats();
 
     const chatSub = supabase
-      .channel('chat_updates')
+      .channel(`chat_updates_${room.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats', filter: `room_id=eq.${room.id}` }, async (payload) => {
         if (payload.new.player_id) {
            const { data: player } = await supabase.from('players').select('nickname').eq('id', payload.new.player_id).single();

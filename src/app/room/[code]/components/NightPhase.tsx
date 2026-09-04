@@ -66,7 +66,7 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
     };
     fetchActions();
 
-    const sub = supabase.channel('night_actions_updates')
+    const sub = supabase.channel(`night_actions_updates_${room.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'night_actions', filter: `room_id=eq.${room.id}` }, (payload) => {
          setSubmittedActorIds(prev => [...prev, payload.new.actor_id]);
       })

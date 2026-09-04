@@ -71,7 +71,7 @@ export default function RoomPage({ params }: { params: Promise<{ code: string }>
 
     // Subscribe to Room changes
     const roomSub = supabase
-      .channel('room_updates')
+      .channel(`room_updates_${roomCode}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rooms', filter: `room_code=eq.${roomCode}` }, (payload) => {
         setRoom(payload.new);
       })
@@ -91,7 +91,7 @@ export default function RoomPage({ params }: { params: Promise<{ code: string }>
     if (!room?.id) return;
 
     const playersSub = supabase
-      .channel('players_updates')
+      .channel(`players_updates_${room.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'players', filter: `room_id=eq.${room.id}` }, async () => {
         // Just refetch players to be safe and simple
         const { data: updatedPlayers } = await supabase
