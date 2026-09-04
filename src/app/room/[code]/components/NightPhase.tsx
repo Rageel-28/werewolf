@@ -19,6 +19,7 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
   const [loading, setLoading] = useState(false);
   const [seerResult, setSeerResult] = useState<string | null>(null);
   const [submittedActorIds, setSubmittedActorIds] = useState<string[]>([]);
+  const [optimisticActed, setOptimisticActed] = useState(false);
   const resolvingRef = useRef(false);
 
   const role = currentPlayer?.role;
@@ -26,7 +27,7 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
   const isActiveRole = ['Werewolf', 'Seer', 'Guardian'].includes(role);
   const alivePlayers = players.filter((p: any) => p.is_alive);
   
-  const hasActed = submittedActorIds.includes(currentPlayer?.id);
+  const hasActed = submittedActorIds.includes(currentPlayer?.id) || optimisticActed;
 
   const TURN_ORDER = ['Seer', 'Guardian', 'Werewolf'];
   let currentTurnRole: string | null = null;
@@ -106,21 +107,26 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
     }
   }, [isAdmin, submittedActorIds, players]);
 
-  const handleAction = async () => {
-    if (!selectedTarget) return;
+  const handleAction = async (targetOverride?: string) => {
+    // If it's a string, use it. If it's an event object from onClick, ignore it.
+    const target = typeof targetOverride === 'string' ? targetOverride : selectedTarget;
+    if (!target) return;
     setLoading(true);
 
     if (role === 'Seer') {
-      const target = players.find((p: any) => p.id === selectedTarget);
-      if (target) {
-         const isBad = target.role === 'Werewolf';
-         setSeerResult(`${target.nickname} ${isBad ? 'adalah Werewolf!' : 'bukan Werewolf.'}`);
+      const pTarget = players.find((p: any) => p.id === target);
+      if (pTarget) {
+         const isBad = pTarget.role === 'Werewolf';
+         setSeerResult(`${pTarget.nickname} ${isBad ? 'adalah Werewolf!' : 'bukan Werewolf.'}`);
       }
     }
 
-    await submitNightAction(room.id, room.day_count, currentPlayer.id, selectedTarget, role.toLowerCase());
+    // Set optimistic state immediately to prevent polling race conditions
+    setOptimisticActed(true);
+
+    await submitNightAction(room.id, room.day_count, currentPlayer.id, target, role.toLowerCase());
     
-    // Optimistic UI Update
+    // Optimistic UI Update for array
     setSubmittedActorIds(prev => {
        if (!prev.includes(currentPlayer.id)) {
           return [...prev, currentPlayer.id];
@@ -193,7 +199,7 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
                 {role === 'Werewolf' && players.filter((p: any) => p.role === 'Minion').length > 0 && (
                    <li>Budak Minion: <span className="font-bold text-error">{players.filter((p: any) => p.role === 'Minion').map((p: any) => p.nickname).join(', ')}</span></li>
                 )}
-                {players.filter((p: any) => p.role === 'Minion' && p.id !== currentPlayer.id).length > 0 && (
+                {role === 'Minion' && players.filter((p: any) => p.role === 'Minion' && p.id !== currentPlayer.id).length > 0 && (
                    <li>Rekan Minion: <span className="font-bold text-error">{players.filter((p: any) => p.role === 'Minion' && p.id !== currentPlayer.id).map((p: any) => p.nickname).join(', ')}</span></li>
                 )}
                 {players.filter((p: any) => ['Werewolf', 'Minion'].includes(p.role) && p.id !== currentPlayer.id).length === 0 && (
@@ -249,8 +255,8 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
                 <h3 className="font-headline-md text-headline-md text-error uppercase mb-2">Malam Pertama</h3>
                 <p className="font-body-md text-on-surface-variant text-center mb-space-md">Manusia Serigala belum lapar. Tidak ada darah yang tumpah malam ini.</p>
                 <button
-                  onClick={() => { setSelectedTarget('skip'); setTimeout(handleAction, 100); }}
-                  disabled={loading}
+                  onClick={() => handleAction('skip')}
+                  disabled={loading || optimisticActed}
                   className="px-space-xl py-space-sm rounded-full bg-error text-on-error font-label-md text-label-md uppercase tracking-wider active:scale-95 transition-transform"
                 >
                   Lewati Malam
