@@ -56,12 +56,24 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
     const fetchActions = async () => {
       const { data } = await supabase
         .from('night_actions')
-        .select('actor_id')
+        .select('actor_id, target_id')
         .eq('room_id', room.id)
         .eq('day_count', room.day_count);
         
       if (data) {
         setSubmittedActorIds(data.map(d => d.actor_id));
+        
+        // Recover Seer result on refresh
+        if (role === 'Seer') {
+           const myAction = data.find(d => d.actor_id === currentPlayer.id);
+           if (myAction && myAction.target_id) {
+              const target = players.find((p: any) => p.id === myAction.target_id);
+              if (target) {
+                 const isBad = target.role === 'Werewolf';
+                 setSeerResult(`${target.nickname} ${isBad ? 'adalah Werewolf!' : 'bukan Werewolf.'}`);
+              }
+           }
+        }
       }
     };
     fetchActions();
