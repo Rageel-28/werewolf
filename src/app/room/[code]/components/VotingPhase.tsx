@@ -86,8 +86,8 @@ export default function VotingPhase({ room, players, currentPlayer, isAdmin }: a
           <div className="flex items-center gap-space-sm">
             <span className="material-symbols-outlined text-error text-[24px]">gavel</span>
             <div className="flex flex-col">
-              <span className="font-headline-md text-headline-md text-error leading-tight">Pengadilan Desa</span>
-              <span className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-bold">Penentuan Eksekusi</span>
+              <span className="font-headline-md text-headline-md text-error leading-tight">Peran: {currentPlayer?.role}</span>
+              <span className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-bold">{currentPlayer?.nickname}</span>
             </div>
           </div>
           <div className="px-2 py-1 bg-error-container/20 border border-error/30 rounded">

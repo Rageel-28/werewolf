@@ -24,8 +24,8 @@ export default function HunterRevenge({ room, players, currentPlayer, isAdmin }:
           <div className="flex items-center gap-space-sm">
             <span className="material-symbols-outlined text-error text-[28px] animate-pulse">crisis_alert</span>
             <div className="flex flex-col">
-              <span className="font-headline-md text-headline-md text-error leading-tight">Momen Sakaratul Maut</span>
-              <span className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-bold">Peringatan Terakhir</span>
+              <span className="font-headline-md text-headline-md text-error leading-tight">Peran: {currentPlayer?.role}</span>
+              <span className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-bold">{currentPlayer?.nickname}</span>
             </div>
           </div>
         </div>

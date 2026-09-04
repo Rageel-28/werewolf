@@ -108,8 +108,8 @@ export default function DayPhase({ room, players, currentPlayer, isAdmin }: any)
           <div className="flex items-center gap-space-sm">
             <span className="material-symbols-outlined text-[#d97707] text-[28px] animate-[spin_10s_linear_infinite]">light_mode</span>
             <div className="flex flex-col">
-              <span className="font-headline-md text-headline-md text-[#2f1500] leading-tight">Matahari Terbit</span>
-              <span className="font-label-sm text-label-sm uppercase tracking-widest text-[#6e3900] font-bold">Desa Ravenshire</span>
+              <span className="font-headline-md text-headline-md text-[#2f1500] leading-tight">Peran: {currentPlayer?.role}</span>
+              <span className="font-label-sm text-label-sm uppercase tracking-widest text-[#6e3900] font-bold">{currentPlayer?.nickname}</span>
             </div>
           </div>
           <div className="px-3 py-1 bg-white border border-[#e7e0d3] rounded shadow-sm">
