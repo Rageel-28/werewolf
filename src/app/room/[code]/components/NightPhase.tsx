@@ -20,6 +20,7 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
   const [seerResult, setSeerResult] = useState<string | null>(null);
   const [submittedActorIds, setSubmittedActorIds] = useState<string[]>([]);
   const [optimisticActed, setOptimisticActed] = useState(false);
+  const [seerReadyToSubmit, setSeerReadyToSubmit] = useState(false);
   const resolvingRef = useRef(false);
 
   const role = currentPlayer?.role;
@@ -111,15 +112,19 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
     // If it's a string, use it. If it's an event object from onClick, ignore it.
     const target = typeof targetOverride === 'string' ? targetOverride : selectedTarget;
     if (!target) return;
-    setLoading(true);
-
-    if (role === 'Seer') {
+    
+    // For Seer, show result first, require second click to submit
+    if (role === 'Seer' && !seerReadyToSubmit) {
       const pTarget = players.find((p: any) => p.id === target);
       if (pTarget) {
          const isBad = pTarget.role === 'Werewolf';
          setSeerResult(`${pTarget.nickname} ${isBad ? 'adalah Werewolf!' : 'bukan Werewolf.'}`);
+         setSeerReadyToSubmit(true);
       }
+      return;
     }
+
+    setLoading(true);
 
     // Set optimistic state immediately to prevent polling race conditions
     setOptimisticActed(true);
@@ -265,7 +270,16 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
           ) : (
             <section className="flex flex-col gap-space-sm mb-24">
               <span className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">Daftar Jiwa (Pilih Satu)</span>
-              <div className="flex flex-col gap-space-xs">
+              
+              {role === 'Seer' && seerResult && !hasActed && (
+                <div className="w-full mb-space-sm p-space-md bg-primary-container/20 border border-primary/30 rounded-xl text-center shadow-[0_0_15px_rgba(208,188,255,0.1)]">
+                   <span className="material-symbols-outlined text-[32px] text-primary mb-2 animate-pulse">visibility</span>
+                   <h3 className="font-headline-sm text-headline-sm text-primary mb-1">Hasil Terawangan</h3>
+                   <p className="font-body-lg text-on-surface">{seerResult}</p>
+                </div>
+              )}
+
+              <div className={`flex flex-col gap-space-xs ${seerReadyToSubmit ? 'opacity-50 pointer-events-none' : ''}`}>
                 {alivePlayers.filter((p: any) => p.id !== currentPlayer.id || role === 'Guardian').map((p: any) => (
                   <button
                     key={p.id}
@@ -344,7 +358,7 @@ export default function NightPhase({ room, players, currentPlayer, isAdmin }: an
             className="w-full h-14 rounded-full bg-primary hover:bg-primary-fixed-dim text-on-primary font-headline-md text-headline-md tracking-wider flex items-center justify-center gap-space-sm shadow-[0_4px_20px_rgba(208,188,255,0.4)] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:shadow-none"
           >
             <span className="material-symbols-outlined text-[24px]">verified</span>
-            {loading ? 'MENYELAIKAN...' : 'KONFIRMASI RITUAL'}
+            {loading ? 'MENYELAIKAN...' : seerReadyToSubmit ? 'TUTUP & SELANJUTNYA' : 'KONFIRMASI RITUAL'}
           </button>
         </div>
       )}
