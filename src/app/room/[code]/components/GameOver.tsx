@@ -1,9 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { resetRoomAction } from '@/app/actions';
 
 export default function GameOver({ room, players, currentPlayer, isAdmin }: any) {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handlePlayAgain = async () => {
+    setLoading(true);
+    await resetRoomAction(room.id);
+    setLoading(false);
+  };
 
   const alivePlayers = players.filter((p: any) => p.is_alive);
   const evilCount = alivePlayers.filter((p: any) => ['Werewolf', 'Minion'].includes(p.role)).length;
@@ -151,7 +160,17 @@ export default function GameOver({ room, players, currentPlayer, isAdmin }: any)
 
       </main>
 
-      <div className="fixed bottom-0 left-0 w-full p-gutter-mobile pb-safe bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/95 to-transparent z-40 flex justify-center">
+      <div className="fixed bottom-0 left-0 w-full p-gutter-mobile pb-safe bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/95 to-transparent z-40 flex flex-col gap-space-sm justify-center items-center">
+        {isAdmin && (
+          <button 
+            onClick={handlePlayAgain}
+            disabled={loading}
+            className="w-full max-w-2xl h-14 rounded-full bg-primary hover:bg-primary-fixed-dim text-on-primary font-headline-md text-headline-md tracking-wider flex items-center justify-center gap-space-sm shadow-lg active:scale-[0.98] transition-transform disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-[24px]">replay</span>
+            {loading ? 'MEMPROSES...' : 'MAIN LAGI (SAMA ANGGOTA)'}
+          </button>
+        )}
         <button 
           onClick={() => router.push('/')}
           className="w-full max-w-2xl h-14 rounded-full bg-surface-container-high border border-surface-container-highest hover:bg-surface-container-highest text-on-surface font-headline-md text-headline-md tracking-wider flex items-center justify-center gap-space-sm shadow-lg active:scale-[0.98] transition-transform"

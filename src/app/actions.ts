@@ -291,3 +291,18 @@ export async function skipHunterRevengeAction(roomId: string) {
   }
   return { success: true };
 }
+
+export async function resetRoomAction(roomId: string) {
+  // Clear old game data to avoid clutter and bugs on next rounds
+  await supabase.from('night_actions').delete().eq('room_id', roomId);
+  await supabase.from('votes').delete().eq('room_id', roomId);
+  await supabase.from('chats').delete().eq('room_id', roomId);
+
+  // Reset players
+  await supabase.from('players').update({ is_alive: true, role: null }).eq('room_id', roomId);
+
+  // Reset room
+  await supabase.from('rooms').update({ status: 'waiting', day_count: 0, timer_ends_at: null }).eq('id', roomId);
+  
+  return { success: true };
+}
